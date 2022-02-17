@@ -1,4 +1,6 @@
-## Getting Started
+## JavaFx is a real portable GUI framework for developers who like to code
+
+A simple JavaFx project for testing if the JavaFx libs are working (it uses images as resources) and for making sure I still can remember the java class path syntax
 
 Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
 
