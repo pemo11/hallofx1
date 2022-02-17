@@ -4,10 +4,22 @@
  * 
  * Das kleine Beispiel hat mich noch etwas "Nerven" gekostet aufgrund der Pfadproblematik
  * Am Morgen des 04/02/2022 lief es aber gut und alle Bundespräsidenten werden schön angezeigt
+ * Nach Übertragen auf den Laptop lief es dann nicht mehr!
+ * Die Lösung: Der resources-Ordner muss im src-Verzeichnis liegen
+ * Es kann aber auch mit dem classpath-Wert zu tun haben, der aber in diesem Fall gar nicht
+ * explizit gesetzt wird
  * Wichtig: In den Einstellungen muss noch eine Option gesetzt werden unter Java Debugger->Settings->VM Args
- * --module-path /Library/JavaFx/javafx-sdk-17.0.2/lib --add-modules=javafx.controls
+ * <--module-path /Library/JavaFx/javafx-sdk-17.0.2/lib --add-modules=javafx.controls>
  * Es wird keine Launch.json-Datei benötigt
  * 
+ * Aufruf in der Befehlszeile:
+ * 1) javac hallofx1/App.java -cp E:\Java\javafx-sdk-17.0.2\lib\*
+ * 2) java --module-path E:\Java\javafx-sdk-17.0.2\lib --add-modules=javafx.controls hallofx1.App -cp .
+ * Damit geht es tatsächlich (mit Bild), es kommt auf auf den . bei -cp an
+ * Ohne -cp . keine Bilder!
+ * Und: Ohne --add-modules gibt es eine ClassNotFoundException bei hallofx.App
+ * Aber: Es gibt unregelmäßig nnn.png gibt es nicht Fehler, obwohl das Bild danach angezeigt wird!
+ * Alles etwas seltsam, ganz verstanden habe ich es daher noch nicht
  * Ideen für Erweiterugnen:
  * >Anzeigen der Amtszeit
  * >Geburtsjahr oder Lebensdauer
@@ -64,22 +76,28 @@ public class App extends Application {
                 int z = (int)Math.floor(Math.random() * imgDic.values().size());
                 // Eventuell etwas umständlich?
                 imgName = imgDic.keySet().toArray()[z].toString();
-            }  while(imgName == lastName);
+            }  while(imgName.equals(lastName));
             // Derselbe Name soll nicht 2x nacheinander kommen
             // Für ein späteres Erklärvideo bzw. meinen Java-Kurs: == oder != macht hier ein großen Unterschied;)
             lastName = imgName;
             // Wichtig: resources ist ein Verzeichnis direkt im bin-Verzeichnis (das Unterverzeichnis images nicht vergessen;)
             // Es kann sein, dass der resources-Ordner im bin-Verzeichnis gelöscht wird
             // Ansonsten droht eine ganz üble NullPointerException;)
-            imgPfad = getClass().getResource("/resources/images/" + imgName.replace(" ", "") + ".png").toURI().toString();
-            // Geht nur mit einem "richtigen" Pfad - generell sollte es auch ohne resources gehen, aber mit ist wahrscheinlich der
-            // bessere Weg, vor allem in Hinblick auf eine spätere Ausführung im Rahmen einer Dmg unter MacOs
-            // InputStream stream = new FileInputStream(imgPfad);
-            Image image = new Image(imgPfad);
-            imageView.setImage(image);
-            label1.setText("");
-        } catch (Exception e1) {
-            System.out.println("!!! Fehler: " + e1.toString());
+            String resourceName = "/resources/images/" + imgName.replace(" ", "") + ".png";
+            if (this.getClass().getResource(resourceName) != null) {
+                imgPfad = this.getClass().getResource(resourceName).toURI().toString();
+                // Geht nur mit einem "richtigen" Pfad - generell sollte es auch ohne resources gehen, aber mit ist wahrscheinlich der
+                // bessere Weg, vor allem in Hinblick auf eine spätere Ausführung im Rahmen einer Dmg unter MacOs
+                // InputStream stream = new FileInputStream(imgPfad);
+                Image image = new Image(imgPfad);
+                imageView.setImage(image);
+                label1.setText("");
+            } else {
+                System.err.println(String.format("!!! %s gibt es nicht !!!", imgPfad));
+            }
+        }
+        catch (Exception e1) {
+            System.err.println("!!! Fehler: " + e1.toString());
         }
     }
 
