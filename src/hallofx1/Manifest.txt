@@ -1,0 +1,1 @@
+Mainclass: hallofx1.app
